@@ -1,5 +1,5 @@
 [package]
-name = "async-transport"
+name = "transport-async"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,7 +10,7 @@ futures = "0.3.30"
 parity-tokio-ipc = { git = "https://github.com/aschey/parity-tokio-ipc", rev = "feb8297ed586862034faed03794d5d46519cd064" }
 pin-project = "1.1.5"
 tokio = { version = "1.37.0", features = ["net", "sync", "io-std", "process"] }
-tokio-stream = "0.1.15"
+tokio-stream = { version = "0.1.15", features = ["net"] }
 serde = { version = "1", features = ["derive"], optional = true }
 tokio-serde = { version = "0.9", optional = true }
 bytes = "1"

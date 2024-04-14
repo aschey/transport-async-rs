@@ -1,8 +1,8 @@
-use async_transport::transport::ipc;
 use futures::StreamExt;
 use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
 use std::error::Error;
 use tokio::io::{split, AsyncReadExt, AsyncWriteExt};
+use transport_async::transport::ipc;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {

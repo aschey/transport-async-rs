@@ -1,10 +1,10 @@
 use std::error::Error;
 
-use async_transport::codec::{Codec, SerdeCodec};
-use async_transport::transport::codec::CodecTransport;
-use async_transport::transport::ipc;
 use futures::{SinkExt, StreamExt};
 use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
+use transport_async::codec::{Codec, SerdeCodec};
+use transport_async::transport::codec::CodecTransport;
+use transport_async::transport::ipc;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {

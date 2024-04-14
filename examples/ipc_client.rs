@@ -1,8 +1,8 @@
 use std::error::Error;
 
-use async_transport::transport::ipc;
 use parity_tokio_ipc::ServerId;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use transport_async::transport::ipc;
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
