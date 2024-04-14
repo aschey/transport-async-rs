@@ -1,0 +1,24 @@
+[package]
+name = "async-transport"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+futures = "0.3.30"
+parity-tokio-ipc = { git = "https://github.com/aschey/parity-tokio-ipc", rev = "feb8297ed586862034faed03794d5d46519cd064" }
+pin-project = "1.1.5"
+tokio = { version = "1.37.0", features = ["net", "sync", "io-std", "process"] }
+tokio-stream = "0.1.15"
+serde = { version = "1", features = ["derive"], optional = true }
+tokio-serde = { version = "0.9", optional = true }
+bytes = "1"
+tokio-util = { version = "0.7", features = ["codec"] }
+
+[features]
+serde-codec = ["serde", "tokio-serde"]
+bincode = ["serde-codec", "tokio-serde/bincode"]
+cbor = ["serde-codec", "tokio-serde/cbor"]
+json = ["serde-codec", "tokio-serde/json"]
+messagepack = ["serde-codec", "tokio-serde/messagepack"]
