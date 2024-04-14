@@ -2,15 +2,16 @@ use futures::StreamExt;
 use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
 use std::error::Error;
 use tokio::io::{split, AsyncReadExt, AsyncWriteExt};
-use transport_async::transport::ipc;
+use transport_async::transport::{ipc, Bind};
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    let incoming = ipc::create_endpoint(
+    let incoming = ipc::Endpoint::bind(ipc::EndpointParams::new(
         ServerId("test"),
-        SecurityAttributes::allow_everyone_create().expect("Failed to set security attributes"),
+        SecurityAttributes::allow_everyone_create()?,
         OnConflict::Overwrite,
-    )?;
+    )?)
+    .await?;
 
     futures::pin_mut!(incoming);
 

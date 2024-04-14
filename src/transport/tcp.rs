@@ -1,43 +1,29 @@
 use std::net::SocketAddr;
-use std::pin::Pin;
-use std::task::{Context, Poll};
 
-use futures::Stream;
-use pin_project::pin_project;
 use tokio::io;
-use tokio::net::{TcpListener, ToSocketAddrs};
+use tokio::net::{TcpListener, TcpStream};
 use tokio_stream::wrappers::TcpListenerStream;
 
-pub type TcpStream = tokio::net::TcpStream;
+use super::{Bind, Connect};
 
-pub async fn create_endpoint(addr: SocketAddr) -> io::Result<TcpListenerStream> {
-    TcpTransport::bind(addr).await
-}
+pub struct Endpoint {}
 
-#[pin_project]
-pub struct TcpTransport {
-    #[pin]
-    listener: TcpListener,
-}
+impl Bind for Endpoint {
+    type Stream = TcpListenerStream;
+    type Params = SocketAddr;
 
-impl TcpTransport {
-    async fn bind(addr: SocketAddr) -> io::Result<TcpListenerStream> {
-        Ok(TcpListenerStream::new(TcpListener::bind(addr).await?))
+    async fn bind(params: Self::Params) -> io::Result<Self::Stream> {
+        Ok(TcpListenerStream::new(TcpListener::bind(params).await?))
     }
 }
 
-// impl Stream for TcpTransport {
-//     type Item = Result<TcpStream, io::Error>;
+pub struct Connection {}
 
-//     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-//         match self.project().listener.poll_accept(cx) {
-//             Poll::Ready(Ok((stream, _))) => Poll::Ready(Some(Ok(stream))),
-//             Poll::Ready(Err(_)) => Poll::Ready(None),
-//             Poll::Pending => Poll::Pending,
-//         }
-//     }
-// }
+impl Connect for Connection {
+    type Stream = TcpStream;
+    type Params = SocketAddr;
 
-pub async fn connect(addr: impl ToSocketAddrs) -> io::Result<TcpStream> {
-    TcpStream::connect(addr).await
+    async fn connect(params: Self::Params) -> io::Result<Self::Stream> {
+        TcpStream::connect(params).await
+    }
 }

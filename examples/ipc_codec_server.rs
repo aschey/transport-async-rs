@@ -4,15 +4,16 @@ use futures::{SinkExt, StreamExt};
 use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
 use transport_async::codec::{Codec, SerdeCodec};
 use transport_async::transport::codec::CodecTransport;
-use transport_async::transport::ipc;
+use transport_async::transport::{ipc, Bind};
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    let incoming = ipc::create_endpoint(
+    let incoming = ipc::Endpoint::bind(ipc::EndpointParams::new(
         ServerId("test"),
-        SecurityAttributes::allow_everyone_create().expect("Failed to set security attributes"),
+        SecurityAttributes::allow_everyone_create()?,
         OnConflict::Overwrite,
-    )?;
+    )?)
+    .await?;
 
     let mut transport =
         CodecTransport::new(incoming, SerdeCodec::<usize, usize>::new(Codec::Bincode));

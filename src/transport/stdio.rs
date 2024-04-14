@@ -2,9 +2,10 @@ use std::io;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use futures::Stream;
 use pin_project::pin_project;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
+
+use super::{Bind, Connect};
 
 #[pin_project]
 pub struct StdioTransport<I, O> {
@@ -22,7 +23,7 @@ impl StdioTransport<tokio::io::Stdin, tokio::io::Stdout> {
         }
     }
 
-    pub fn incoming() -> impl Stream<Item = Result<Self, io::Error>> {
+    pub fn incoming() -> tokio_stream::Once<Result<Self, io::Error>> {
         tokio_stream::once(Ok(Self::default()))
     }
 }
@@ -44,6 +45,25 @@ impl StdioTransport<tokio::process::ChildStdout, tokio::process::ChildStdin> {
             stdin: process.stdout.take()?,
             stdout: process.stdin.take()?,
         })
+    }
+}
+
+impl Bind for StdioTransport<tokio::io::Stdin, tokio::io::Stdout> {
+    type Params = ();
+    type Stream = tokio_stream::Once<Result<Self, io::Error>>;
+
+    async fn bind(_: Self::Params) -> io::Result<Self::Stream> {
+        Ok(Self::incoming())
+    }
+}
+
+impl Connect for StdioTransport<tokio::process::ChildStdout, tokio::process::ChildStdin> {
+    type Params = tokio::process::Child;
+    type Stream = Self;
+
+    async fn connect(mut params: Self::Params) -> io::Result<Self::Stream> {
+        Self::from_child(&mut params)
+            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "child i/o missing"))
     }
 }
 

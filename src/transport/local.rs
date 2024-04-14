@@ -1,11 +1,14 @@
 use core::fmt::Debug;
 use std::error::Error;
+use std::io;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use futures::{Sink, Stream};
+use futures::{ready, Sink, Stream};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::mpsc::{self};
+
+use super::{Bind, Connect};
 
 #[derive(Debug)]
 enum Sender<T> {
@@ -14,7 +17,7 @@ enum Sender<T> {
 }
 
 #[derive(Debug)]
-enum Receiver<T> {
+pub enum Receiver<T> {
     Bounded(mpsc::Receiver<T>),
     Unbounded(mpsc::UnboundedReceiver<T>),
 }
@@ -103,21 +106,19 @@ where
         buf: &mut tokio::io::ReadBuf<'_>,
     ) -> Poll<std::io::Result<()>> {
         match &mut self.rx {
-            Receiver::Bounded(rx) => match rx.poll_recv(cx) {
-                Poll::Ready(Some(msg)) => {
+            Receiver::Bounded(rx) => match ready!(rx.poll_recv(cx)) {
+                Some(msg) => {
                     buf.put_slice(msg.as_ref());
                     Poll::Ready(Ok(()))
                 }
-                Poll::Ready(None) => Poll::Ready(Ok(())),
-                Poll::Pending => Poll::Pending,
+                None => Poll::Ready(Ok(())),
             },
-            Receiver::Unbounded(rx) => match rx.poll_recv(cx) {
-                Poll::Ready(Some(msg)) => {
+            Receiver::Unbounded(rx) => match ready!(rx.poll_recv(cx)) {
+                Some(msg) => {
                     buf.put_slice(msg.as_ref());
                     Poll::Ready(Ok(()))
                 }
-                Poll::Ready(None) => Poll::Ready(Ok(())),
-                Poll::Pending => Poll::Pending,
+                None => Poll::Ready(Ok(())),
             },
         }
     }
@@ -163,6 +164,49 @@ pub fn channel<Req, Res>(
             tx: Sender::Bounded(tx),
         },
     )
+}
+
+impl<Req, Res> Bind for LocalTransportFactory<Req, Res>
+where
+    for<'a> Req: From<&'a [u8]> + Send,
+    Res: AsRef<[u8]> + Send,
+{
+    type Params = Receiver<LocalTransport<Req, Res>>;
+    type Stream = Self;
+
+    async fn bind(params: Self::Params) -> io::Result<Self::Stream> {
+        Ok(Self { rx: params })
+    }
+}
+
+pub struct ConnectParams<Req, Res> {
+    mode: ConnectMode,
+    tx: Sender<LocalTransport<Res, Req>>,
+}
+pub enum ConnectMode {
+    Unbounded,
+    Bounded { buffer_size: usize },
+}
+
+impl<Req, Res> Connect for LocalClientStream<Req, Res>
+where
+    for<'a> Req: From<&'a [u8]> + Send + Debug + 'static,
+    Res: AsRef<[u8]> + Send + Debug + 'static,
+{
+    type Params = ConnectParams<Req, Res>;
+    type Stream = LocalTransport<Req, Res>;
+
+    async fn connect(params: Self::Params) -> io::Result<Self::Stream> {
+        let stream = LocalClientStream { tx: params.tx };
+        match params.mode {
+            ConnectMode::Unbounded => stream
+                .connect_unbounded()
+                .map_err(|e| io::Error::new(io::ErrorKind::NotConnected, e)),
+            ConnectMode::Bounded { buffer_size } => stream
+                .connect(buffer_size)
+                .map_err(|e| io::Error::new(io::ErrorKind::NotConnected, e)),
+        }
+    }
 }
 
 pub struct LocalClientStream<Req, Res> {

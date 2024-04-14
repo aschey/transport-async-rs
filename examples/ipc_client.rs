@@ -2,11 +2,12 @@ use std::error::Error;
 
 use parity_tokio_ipc::ServerId;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use transport_async::transport::ipc;
+use transport_async::transport::{ipc, Connect};
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    let mut client = ipc::connect(ServerId("test")).await?;
+    let mut client =
+        ipc::Connection::connect(ipc::ConnectionParams::new(ServerId("test"))?).await?;
 
     loop {
         let mut buf = [0u8; 4];
