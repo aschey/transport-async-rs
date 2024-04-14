@@ -22,3 +22,14 @@ bincode = ["serde-codec", "tokio-serde/bincode"]
 cbor = ["serde-codec", "tokio-serde/cbor"]
 json = ["serde-codec", "tokio-serde/json"]
 messagepack = ["serde-codec", "tokio-serde/messagepack"]
+
+[dev-dependencies]
+tokio = { version = "1.37.0", features = [
+    "net",
+    "sync",
+    "io-std",
+    "process",
+    "macros",
+    "rt-multi-thread",
+    "io-util",
+] }
