@@ -1,11 +1,11 @@
 use futures::{Future, TryStream};
 use std::io;
 use tokio::io::{AsyncRead, AsyncWrite};
-pub mod codec;
 pub mod ipc;
 pub mod local;
 pub mod stdio;
 pub mod tcp;
+pub mod udp;
 
 pub trait Bind
 where

@@ -2,9 +2,8 @@ use std::error::Error;
 
 use futures::{SinkExt, StreamExt};
 use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
-use transport_async::codec::{Codec, SerdeCodec};
-use transport_async::transport::codec::CodecTransport;
-use transport_async::transport::{ipc, Bind};
+use transport_async::codec::{Codec, CodecStream, SerdeCodec};
+use transport_async::{ipc, Bind};
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -15,8 +14,7 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     )?)
     .await?;
 
-    let mut transport =
-        CodecTransport::new(incoming, SerdeCodec::<usize, usize>::new(Codec::Bincode));
+    let mut transport = CodecStream::new(incoming, SerdeCodec::<usize, usize>::new(Codec::Bincode));
     while let Some(result) = transport.next().await {
         match result {
             Ok(mut stream) => {

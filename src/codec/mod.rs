@@ -5,6 +5,8 @@ use tokio::io::{AsyncRead, AsyncWrite};
 
 mod builder;
 pub use builder::*;
+mod stream;
+pub use stream::*;
 #[cfg(feature = "serde-codec")]
 mod serde;
 #[cfg(feature = "serde-codec")]
@@ -28,7 +30,7 @@ pub enum Codec {
 
 pub fn length_delimited_codec(
     incoming: impl AsyncReadWrite,
-) -> CodecStream<BytesMut, Bytes, io::Error, io::Error> {
+) -> EncodedStream<BytesMut, Bytes, io::Error, io::Error> {
     Box::new(tokio_util::codec::Framed::new(
         incoming,
         tokio_util::codec::LengthDelimitedCodec::new(),

@@ -1,14 +1,14 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
+use super::EncodedStream;
+use crate::codec::CodecBuilder;
 use futures::{ready, Stream, TryStream};
 use pin_project::pin_project;
 use tokio::io::{AsyncRead, AsyncWrite};
 
-use crate::codec::{CodecBuilder, CodecStream};
-
 #[pin_project]
-pub struct CodecTransport<B, I, E, S>
+pub struct CodecStream<B, I, E, S>
 where
     B: CodecBuilder,
     S: TryStream<Ok = I, Error = E>,
@@ -20,7 +20,7 @@ where
     inner: S,
 }
 
-impl<B, I, E, S> CodecTransport<B, I, E, S>
+impl<B, I, E, S> CodecStream<B, I, E, S>
 where
     B: CodecBuilder,
     S: TryStream<Ok = I, Error = E>,
@@ -34,13 +34,13 @@ where
     }
 }
 
-impl<B, I, E, S> Stream for CodecTransport<B, I, E, S>
+impl<B, I, E, S> Stream for CodecStream<B, I, E, S>
 where
     B: CodecBuilder,
     S: TryStream<Ok = I, Error = E>,
     I: AsyncRead + AsyncWrite + Send + Unpin + 'static,
 {
-    type Item = Result<CodecStream<B::Req, B::Res, B::StreamErr, B::SinkErr>, E>;
+    type Item = Result<EncodedStream<B::Req, B::Res, B::StreamErr, B::SinkErr>, E>;
     fn poll_next(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         let this = self.project();
         match ready!(this.inner.try_poll_next(cx)) {

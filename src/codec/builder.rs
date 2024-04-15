@@ -11,7 +11,7 @@ pub trait StreamSink<SinkItem>: Stream + Sink<SinkItem> + Unpin + Send {}
 
 impl<T, SinkItem> StreamSink<SinkItem> for T where T: Stream + Sink<SinkItem> + Unpin + Send {}
 
-pub type CodecStream<Req, Res, StreamErr, SinkErr> =
+pub type EncodedStream<Req, Res, StreamErr, SinkErr> =
     Box<dyn StreamSink<Res, Item = Result<Req, StreamErr>, Error = SinkErr>>;
 
 pub trait CodecBuilder: Send {
@@ -23,14 +23,14 @@ pub trait CodecBuilder: Send {
     fn build_codec(
         &self,
         incoming: Box<dyn AsyncReadWrite>,
-    ) -> CodecStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr>;
+    ) -> EncodedStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr>;
 }
 
 pub fn codec_builder_fn<F, Req, Res, StreamErr, SinkErr>(
     f: F,
 ) -> CodecBuilderFn<F, Req, Res, StreamErr, SinkErr>
 where
-    F: Fn(Box<dyn AsyncReadWrite>) -> CodecStream<Req, Res, StreamErr, SinkErr>,
+    F: Fn(Box<dyn AsyncReadWrite>) -> EncodedStream<Req, Res, StreamErr, SinkErr>,
 {
     CodecBuilderFn {
         f,
@@ -40,7 +40,7 @@ where
 
 pub struct CodecBuilderFn<F, Req, Res, StreamErr, SinkErr>
 where
-    F: Fn(Box<dyn AsyncReadWrite>) -> CodecStream<Req, Res, StreamErr, SinkErr>,
+    F: Fn(Box<dyn AsyncReadWrite>) -> EncodedStream<Req, Res, StreamErr, SinkErr>,
 {
     f: F,
     _phantom: PhantomData<(Req, Res, StreamErr, SinkErr)>,
@@ -49,7 +49,7 @@ where
 impl<F, Req, Res, StreamErr, SinkErr> CodecBuilder
     for CodecBuilderFn<F, Req, Res, StreamErr, SinkErr>
 where
-    F: Fn(Box<dyn AsyncReadWrite>) -> CodecStream<Req, Res, StreamErr, SinkErr> + Send,
+    F: Fn(Box<dyn AsyncReadWrite>) -> EncodedStream<Req, Res, StreamErr, SinkErr> + Send,
     Req: Send,
     Res: Send,
     StreamErr: Error + Send + Sync + 'static,
@@ -63,7 +63,7 @@ where
     fn build_codec(
         &self,
         incoming: Box<dyn AsyncReadWrite>,
-    ) -> CodecStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr> {
+    ) -> EncodedStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr> {
         (self.f)(incoming)
     }
 }
@@ -79,7 +79,7 @@ impl CodecBuilder for LengthDelimitedCodec {
     fn build_codec(
         &self,
         incoming: Box<dyn AsyncReadWrite>,
-    ) -> CodecStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr> {
+    ) -> EncodedStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr> {
         super::length_delimited_codec(incoming)
     }
 }

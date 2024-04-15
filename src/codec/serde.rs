@@ -6,12 +6,13 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_util::codec::LengthDelimitedCodec;
 
 use super::serializer::CodecSerializer;
-use super::{AsyncReadWrite, Codec, CodecBuilder, CodecStream};
+use super::EncodedStream;
+use super::{AsyncReadWrite, Codec, CodecBuilder};
 
 pub fn serde_codec<Req, Res>(
     incoming: impl AsyncRead + AsyncWrite + Send + Unpin + 'static,
     codec: Codec,
-) -> CodecStream<Req, Res, io::Error, io::Error>
+) -> EncodedStream<Req, Res, io::Error, io::Error>
 where
     Req: Serialize + for<'de> Deserialize<'de> + Unpin + Send + 'static,
     Res: Serialize + for<'de> Deserialize<'de> + Unpin + Send + 'static,
@@ -39,7 +40,7 @@ impl<Req, Res> SerdeCodec<Req, Res> {
     pub fn client(
         &self,
         incoming: impl AsyncRead + AsyncWrite + Send + Unpin + 'static,
-    ) -> CodecStream<Res, Req, io::Error, io::Error>
+    ) -> EncodedStream<Res, Req, io::Error, io::Error>
     where
         Req: Serialize + for<'de> Deserialize<'de> + Unpin + Send + 'static,
         Res: Serialize + for<'de> Deserialize<'de> + Unpin + Send + 'static,
@@ -61,7 +62,7 @@ where
     fn build_codec(
         &self,
         incoming: Box<dyn AsyncReadWrite>,
-    ) -> CodecStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr> {
+    ) -> EncodedStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr> {
         serde_codec(incoming, self.codec)
     }
 }

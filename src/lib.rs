@@ -1,2 +1,3 @@
 pub mod codec;
-pub mod transport;
+mod transport;
+pub use transport::*;
