@@ -7,13 +7,9 @@ mod builder;
 pub use builder::*;
 mod stream;
 pub use stream::*;
-#[cfg(feature = "serde-codec")]
 mod serde;
-#[cfg(feature = "serde-codec")]
 pub use self::serde::*;
-#[cfg(feature = "serde-codec")]
 mod serializer;
-#[cfg(feature = "serde-codec")]
 pub use serializer::*;
 
 #[derive(Clone, Debug, Copy)]

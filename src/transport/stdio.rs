@@ -2,17 +2,18 @@ use std::io;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use pin_project::pin_project;
+use pin_project_lite::pin_project;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
 
 use super::{Bind, Connect};
 
-#[pin_project]
-pub struct StdioTransport<I, O> {
-    #[pin]
-    stdin: I,
-    #[pin]
-    stdout: O,
+pin_project! {
+    pub struct StdioTransport<I, O> {
+        #[pin]
+        stdin: I,
+        #[pin]
+        stdout: O,
+    }
 }
 
 impl StdioTransport<tokio::io::Stdin, tokio::io::Stdout> {

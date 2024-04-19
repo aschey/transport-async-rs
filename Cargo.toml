@@ -6,22 +6,29 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-futures = "0.3.30"
-parity-tokio-ipc = { git = "https://github.com/aschey/parity-tokio-ipc", rev = "feb8297ed586862034faed03794d5d46519cd064" }
-pin-project = "1.1.5"
-tokio = { version = "1.37.0", features = ["net", "sync", "io-std", "process"] }
-tokio-stream = { version = "0.1.15", features = ["net"] }
+futures = "0.3"
+parity-tokio-ipc = { git = "https://github.com/aschey/parity-tokio-ipc", rev = "feb8297ed586862034faed03794d5d46519cd064", optional = true }
+tokio = { version = "1" }
+tokio-stream = { version = "0.1", features = ["net"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
 tokio-serde = { version = "0.9", optional = true }
-bytes = "1"
-tokio-util = { version = "0.7", features = ["codec"] }
+bytes = { version = "1", optional = true }
+tokio-util = { version = "0.7", features = ["codec"], optional = true }
+pin-project-lite = "0.2"
 
 [features]
-serde-codec = ["serde", "tokio-serde"]
-bincode = ["serde-codec", "tokio-serde/bincode"]
-cbor = ["serde-codec", "tokio-serde/cbor"]
-json = ["serde-codec", "tokio-serde/json"]
-messagepack = ["serde-codec", "tokio-serde/messagepack"]
+codec = ["serde", "tokio-serde", "bytes", "tokio-util"]
+bincode = ["codec", "tokio-serde/bincode"]
+cbor = ["codec", "tokio-serde/cbor"]
+json = ["codec", "tokio-serde/json"]
+messagepack = ["codec", "tokio-serde/messagepack"]
+ipc = ["parity-tokio-ipc"]
+local = ["tokio/sync"]
+stdio = ["tokio/io-std", "tokio/process", "tokio-stream"]
+tcp = ["tokio/net", "tokio-stream"]
+udp = ["tokio/net", "tokio-stream"]
+all-transports = ["ipc", "local", "stdio", "tcp", "udp"]
+all = ["all-transports", "codec"]
 
 [dev-dependencies]
 tokio = { version = "1.37.0", features = [

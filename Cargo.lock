@@ -660,7 +660,7 @@ dependencies = [
  "bytes",
  "futures",
  "parity-tokio-ipc",
- "pin-project",
+ "pin-project-lite",
  "serde",
  "tokio",
  "tokio-serde",

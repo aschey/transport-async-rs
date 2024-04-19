@@ -4,20 +4,22 @@ use std::task::{Context, Poll};
 use super::EncodedStream;
 use crate::codec::CodecBuilder;
 use futures::{ready, Stream, TryStream};
-use pin_project::pin_project;
+use pin_project_lite::pin_project;
 use tokio::io::{AsyncRead, AsyncWrite};
 
-#[pin_project]
-pub struct CodecStream<B, I, E, S>
-where
-    B: CodecBuilder,
-    S: TryStream<Ok = I, Error = E>,
-    I: AsyncRead + AsyncWrite,
-{
-    #[pin]
-    codec_builder: B,
-    #[pin]
-    inner: S,
+pin_project! {
+    pub struct CodecStream<B, I, E, S>
+    where
+        B: CodecBuilder,
+        S: TryStream<Ok = I, Error = E>,
+        I: AsyncRead,
+        I: AsyncWrite
+    {
+        #[pin]
+        codec_builder: B,
+        #[pin]
+        inner: S,
+    }
 }
 
 impl<B, I, E, S> CodecStream<B, I, E, S>

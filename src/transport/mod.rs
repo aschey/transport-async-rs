@@ -1,10 +1,15 @@
 use futures::{Future, TryStream};
 use std::io;
 use tokio::io::{AsyncRead, AsyncWrite};
+#[cfg(feature = "ipc")]
 pub mod ipc;
+#[cfg(feature = "local")]
 pub mod local;
+#[cfg(feature = "stdio")]
 pub mod stdio;
+#[cfg(feature = "tcp")]
 pub mod tcp;
+#[cfg(feature = "udp")]
 pub mod udp;
 
 pub trait Bind
