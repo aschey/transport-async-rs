@@ -1,26 +1,52 @@
+use clap::Parser;
 use futures::StreamExt;
 use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
 use std::error::Error;
 use tokio::io::{split, AsyncReadExt, AsyncWriteExt};
-use transport_async::{ipc, Bind};
+use transport_async::BoxedStream;
+use transport_async::{ipc, tcp, udp, Bind};
+
+#[derive(clap::Parser)]
+struct Cli {
+    transport: TransportMode,
+}
+#[derive(clap::ValueEnum, Clone)]
+enum TransportMode {
+    Tcp,
+    Udp,
+    Ipc,
+}
 
 #[tokio::main]
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-    let incoming = ipc::Endpoint::bind(ipc::EndpointParams::new(
-        ServerId("test"),
-        SecurityAttributes::allow_everyone_create()?,
-        OnConflict::Overwrite,
-    )?)
-    .await?;
+    let cli = Cli::parse();
+    let incoming = match cli.transport {
+        TransportMode::Tcp => tcp::Endpoint::bind("127.0.0.1:8081".parse()?)
+            .await?
+            .into_boxed(),
+        TransportMode::Udp => udp::Endpoint::bind(udp::ConnectionParams {
+            bind_addr: "127.0.0.1:9010".parse()?,
+            connect_addr: "127.0.0.1:9009".parse()?,
+        })
+        .await?
+        .into_boxed(),
+        TransportMode::Ipc => ipc::Endpoint::bind(ipc::EndpointParams::new(
+            ServerId("test"),
+            SecurityAttributes::allow_everyone_create()?,
+            OnConflict::Overwrite,
+        )?)
+        .await?
+        .into_boxed(),
+    };
 
     futures::pin_mut!(incoming);
-
+    let mut conns = vec![];
     while let Some(result) = incoming.next().await {
         match result {
             Ok(stream) => {
                 let (mut reader, mut writer) = split(stream);
 
-                tokio::spawn(async move {
+                conns.push(tokio::spawn(async move {
                     loop {
                         let mut buf = [0u8; 4];
 
@@ -37,10 +63,13 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
                             println!("SEND: PONG");
                         }
                     }
-                });
+                }));
             }
             _ => unreachable!("ideally"),
         }
+    }
+    for conn in conns {
+        conn.await?;
     }
     Ok(())
 }

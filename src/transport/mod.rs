@@ -1,6 +1,8 @@
-use futures::{Future, TryStream};
-use std::io;
+use futures::{Future, Stream, StreamExt, TryStream};
+use std::{io, pin::Pin};
 use tokio::io::{AsyncRead, AsyncWrite};
+
+use crate::AsyncReadWrite;
 #[cfg(feature = "ipc")]
 pub mod ipc;
 #[cfg(feature = "local")]
@@ -27,4 +29,31 @@ pub trait Connect {
     type Params;
 
     fn connect(params: Self::Params) -> impl Future<Output = io::Result<Self::Stream>> + Send;
+}
+
+pub trait BoxedStream {
+    fn into_boxed(self) -> Pin<Box<dyn Stream<Item = io::Result<Box<dyn AsyncReadWrite>>>>>;
+}
+
+impl<T, S> BoxedStream for T
+where
+    T: Stream<Item = io::Result<S>> + 'static,
+    S: AsyncReadWrite,
+{
+    fn into_boxed(self) -> Pin<Box<dyn Stream<Item = io::Result<Box<dyn AsyncReadWrite>>>>> {
+        Box::pin(self.map(|s| s.map(|s| Box::new(s) as Box<dyn AsyncReadWrite>)))
+    }
+}
+
+pub trait BoxedAsyncRW {
+    fn into_boxed(self) -> Pin<Box<dyn AsyncReadWrite>>;
+}
+
+impl<T> BoxedAsyncRW for T
+where
+    T: AsyncReadWrite,
+{
+    fn into_boxed(self) -> Pin<Box<dyn AsyncReadWrite>> {
+        Box::pin(self)
+    }
 }

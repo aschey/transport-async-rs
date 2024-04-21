@@ -16,7 +16,7 @@ pub struct UdpStream {
     inner: UdpSocket,
 }
 
-pub struct UdpParams {
+pub struct ConnectionParams {
     pub bind_addr: SocketAddr,
     pub connect_addr: SocketAddr,
 }
@@ -25,7 +25,7 @@ pub struct Endpoint {}
 
 impl Bind for Endpoint {
     type Stream = tokio_stream::Once<io::Result<UdpStream>>;
-    type Params = UdpParams;
+    type Params = ConnectionParams;
 
     async fn bind(params: Self::Params) -> io::Result<Self::Stream> {
         let socket = UdpSocket::bind(params.bind_addr).await?;
@@ -66,7 +66,7 @@ pub struct Connection {}
 
 impl Connect for Connection {
     type Stream = UdpStream;
-    type Params = UdpParams;
+    type Params = ConnectionParams;
 
     async fn connect(params: Self::Params) -> io::Result<Self::Stream> {
         let socket = UdpSocket::bind(params.bind_addr).await?;

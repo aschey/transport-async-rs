@@ -1,7 +1,7 @@
 use std::io;
 
+use crate::AsyncReadWrite;
 use bytes::{Bytes, BytesMut};
-use tokio::io::{AsyncRead, AsyncWrite};
 
 mod builder;
 pub use builder::*;
@@ -32,7 +32,3 @@ pub fn length_delimited_codec(
         tokio_util::codec::LengthDelimitedCodec::new(),
     ))
 }
-
-pub trait AsyncReadWrite: AsyncRead + AsyncWrite + Send + Unpin + 'static {}
-
-impl<T> AsyncReadWrite for T where T: AsyncRead + AsyncWrite + Send + Unpin + 'static {}

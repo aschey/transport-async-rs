@@ -31,6 +31,7 @@ all-transports = ["ipc", "local", "stdio", "tcp", "udp"]
 all = ["all-transports", "codec"]
 
 [dev-dependencies]
+clap = { version = "4.5.4", features = ["derive"] }
 tokio = { version = "1.37.0", features = [
     "net",
     "sync",
