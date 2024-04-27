@@ -1,8 +1,8 @@
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
-use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
 use std::error::Error;
 use transport_async::codec::{Codec, CodecStream, SerdeCodec};
+use transport_async::ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
 use transport_async::BoxedStream;
 use transport_async::{ipc, tcp, udp, Bind};
 

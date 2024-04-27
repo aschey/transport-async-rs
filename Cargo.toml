@@ -58,3 +58,15 @@ required-features = ["ipc", "tcp", "udp", "all-codecs"]
 [[example]]
 name = "codec_server"
 required-features = ["ipc", "tcp", "udp", "all-codecs"]
+
+[[example]]
+name = "local"
+required-features = ["local"]
+
+[[example]]
+name = "stdio_client"
+required-features = ["stdio", "all-codecs"]
+
+[[example]]
+name = "stdio_server"
+required-features = ["stdio", "all-codecs"]

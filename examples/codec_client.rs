@@ -1,8 +1,8 @@
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
-use parity_tokio_ipc::ServerId;
 use std::error::Error;
 use transport_async::codec::{Codec, SerdeCodec};
+use transport_async::ipc::ServerId;
 use transport_async::{ipc, tcp, udp, BoxedAsyncRW, Connect};
 
 #[derive(clap::Parser)]

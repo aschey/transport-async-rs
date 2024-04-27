@@ -1,8 +1,8 @@
 use std::error::Error;
 
 use clap::Parser;
-use parity_tokio_ipc::ServerId;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use transport_async::ipc::ServerId;
 use transport_async::{ipc, tcp, udp, BoxedAsyncRW, Connect};
 
 #[derive(clap::Parser)]
