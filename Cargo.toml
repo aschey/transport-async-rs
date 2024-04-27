@@ -28,6 +28,7 @@ stdio = ["tokio/io-std", "tokio/process", "tokio-stream"]
 tcp = ["tokio/net", "tokio-stream"]
 udp = ["tokio/net", "tokio-stream"]
 all-transports = ["ipc", "local", "stdio", "tcp", "udp"]
+all-codecs = ["cbor", "json", "messagepack", "bincode"]
 all = ["all-transports", "codec"]
 
 [dev-dependencies]
@@ -41,3 +42,19 @@ tokio = { version = "1.37.0", features = [
     "rt-multi-thread",
     "io-util",
 ] }
+
+[[example]]
+name = "client"
+required-features = ["ipc", "tcp", "udp"]
+
+[[example]]
+name = "server"
+required-features = ["ipc", "tcp", "udp"]
+
+[[example]]
+name = "codec_client"
+required-features = ["ipc", "tcp", "udp", "all-codecs"]
+
+[[example]]
+name = "codec_server"
+required-features = ["ipc", "tcp", "udp", "all-codecs"]

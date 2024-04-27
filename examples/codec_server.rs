@@ -1,39 +1,3 @@
-// use std::error::Error;
-
-// use futures::{SinkExt, StreamExt};
-// use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
-// use transport_async::codec::{Codec, CodecStream, SerdeCodec};
-// use transport_async::{ipc, Bind};
-
-// #[tokio::main]
-// pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
-//     let incoming = ipc::Endpoint::bind(ipc::EndpointParams::new(
-//         ServerId("test"),
-//         SecurityAttributes::allow_everyone_create()?,
-//         OnConflict::Overwrite,
-//     )?)
-//     .await?;
-
-//     let mut transport = CodecStream::new(incoming, SerdeCodec::<usize, usize>::new(Codec::Bincode));
-//     while let Some(result) = transport.next().await {
-//         match result {
-//             Ok(mut stream) => {
-//                 tokio::spawn(async move {
-//                     loop {
-//                         if let Some(Ok(req)) = stream.next().await {
-//                             println!("ping {req}");
-//                             stream.send(req + 1).await.unwrap();
-//                         }
-//                     }
-//                 });
-//             }
-//             _ => unreachable!("ideally"),
-//         }
-//     }
-
-//     Ok(())
-// }
-
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use parity_tokio_ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
@@ -45,12 +9,22 @@ use transport_async::{ipc, tcp, udp, Bind};
 #[derive(clap::Parser)]
 struct Cli {
     transport: TransportMode,
+    codec: CodecMode,
 }
+
 #[derive(clap::ValueEnum, Clone)]
 enum TransportMode {
     Tcp,
     Udp,
     Ipc,
+}
+
+#[derive(clap::ValueEnum, Clone)]
+enum CodecMode {
+    Bincode,
+    Cbor,
+    Json,
+    MessagePack,
 }
 
 #[tokio::main]
@@ -75,7 +49,14 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         .into_boxed(),
     };
 
-    let mut transport = CodecStream::new(incoming, SerdeCodec::<usize, usize>::new(Codec::Bincode));
+    let codec = match cli.codec {
+        CodecMode::Bincode => Codec::Bincode,
+        CodecMode::Cbor => Codec::Cbor,
+        CodecMode::Json => Codec::Json,
+        CodecMode::MessagePack => Codec::MessagePack,
+    };
+
+    let mut transport = CodecStream::new(incoming, SerdeCodec::<usize, usize>::new(codec));
 
     let mut conns = vec![];
     while let Some(result) = transport.next().await {

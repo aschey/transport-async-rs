@@ -10,6 +10,7 @@ use transport_async::{ipc, tcp, udp, Bind};
 struct Cli {
     transport: TransportMode,
 }
+
 #[derive(clap::ValueEnum, Clone)]
 enum TransportMode {
     Tcp,

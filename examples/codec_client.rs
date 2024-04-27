@@ -8,12 +8,22 @@ use transport_async::{ipc, tcp, udp, BoxedAsyncRW, Connect};
 #[derive(clap::Parser)]
 struct Cli {
     transport: TransportMode,
+    codec: CodecMode,
 }
+
 #[derive(clap::ValueEnum, Clone)]
 enum TransportMode {
     Tcp,
     Udp,
     Ipc,
+}
+
+#[derive(clap::ValueEnum, Clone)]
+enum CodecMode {
+    Bincode,
+    Cbor,
+    Json,
+    MessagePack,
 }
 
 #[tokio::main]
@@ -36,7 +46,14 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         }
     };
 
-    let mut client = SerdeCodec::<usize, usize>::new(Codec::Bincode).client(client);
+    let codec = match cli.codec {
+        CodecMode::Bincode => Codec::Bincode,
+        CodecMode::Cbor => Codec::Cbor,
+        CodecMode::Json => Codec::Json,
+        CodecMode::MessagePack => Codec::MessagePack,
+    };
+
+    let mut client = SerdeCodec::<usize, usize>::new(codec).client(client);
 
     let mut next = 0;
     loop {
