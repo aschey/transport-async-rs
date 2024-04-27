@@ -1,13 +1,13 @@
 use std::{
     io,
-    net::SocketAddr,
+    marker::PhantomData,
     pin::Pin,
     task::{Context, Poll},
 };
 
 use tokio::{
     io::{AsyncRead, AsyncWrite, ReadBuf},
-    net::UdpSocket,
+    net::{ToSocketAddrs, UdpSocket},
 };
 
 use crate::{Bind, Connect};
@@ -16,16 +16,22 @@ pub struct UdpStream {
     inner: UdpSocket,
 }
 
-pub struct ConnectionParams {
-    pub bind_addr: SocketAddr,
-    pub connect_addr: SocketAddr,
+pub struct ConnectionParams<B, C> {
+    pub bind_addr: B,
+    pub connect_addr: C,
 }
 
-pub struct Endpoint {}
+pub struct Endpoint<B, C> {
+    _phantom: PhantomData<(B, C)>,
+}
 
-impl Bind for Endpoint {
+impl<B, C> Bind for Endpoint<B, C>
+where
+    B: ToSocketAddrs + Send,
+    C: ToSocketAddrs + Send,
+{
     type Stream = tokio_stream::Once<io::Result<UdpStream>>;
-    type Params = ConnectionParams;
+    type Params = ConnectionParams<B, C>;
 
     async fn bind(params: Self::Params) -> io::Result<Self::Stream> {
         let socket = UdpSocket::bind(params.bind_addr).await?;
@@ -62,11 +68,17 @@ impl AsyncWrite for UdpStream {
     }
 }
 
-pub struct Connection {}
+pub struct Connection<B, C> {
+    _phantom: PhantomData<(B, C)>,
+}
 
-impl Connect for Connection {
+impl<B, C> Connect for Connection<B, C>
+where
+    B: ToSocketAddrs + Send,
+    C: ToSocketAddrs + Send,
+{
     type Stream = UdpStream;
-    type Params = ConnectionParams;
+    type Params = ConnectionParams<B, C>;
 
     async fn connect(params: Self::Params) -> io::Result<Self::Stream> {
         let socket = UdpSocket::bind(params.bind_addr).await?;

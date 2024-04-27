@@ -1,27 +1,37 @@
-use std::net::SocketAddr;
+use std::marker::PhantomData;
 
 use tokio::io;
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::{TcpListener, TcpStream, ToSocketAddrs};
 use tokio_stream::wrappers::TcpListenerStream;
 
 use super::{Bind, Connect};
 
-pub struct Endpoint {}
+pub struct Endpoint<A> {
+    _phantom: PhantomData<A>,
+}
 
-impl Bind for Endpoint {
+impl<A> Bind for Endpoint<A>
+where
+    A: ToSocketAddrs + Send,
+{
     type Stream = TcpListenerStream;
-    type Params = SocketAddr;
+    type Params = A;
 
     async fn bind(params: Self::Params) -> io::Result<Self::Stream> {
         Ok(TcpListenerStream::new(TcpListener::bind(params).await?))
     }
 }
 
-pub struct Connection {}
+pub struct Connection<A> {
+    _phantom: PhantomData<A>,
+}
 
-impl Connect for Connection {
+impl<A> Connect for Connection<A>
+where
+    A: ToSocketAddrs + Send,
+{
     type Stream = TcpStream;
-    type Params = SocketAddr;
+    type Params = A;
 
     async fn connect(params: Self::Params) -> io::Result<Self::Stream> {
         TcpStream::connect(params).await

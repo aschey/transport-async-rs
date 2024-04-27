@@ -31,12 +31,10 @@ enum CodecMode {
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let cli = Cli::parse();
     let incoming = match cli.transport {
-        TransportMode::Tcp => tcp::Endpoint::bind("127.0.0.1:8081".parse()?)
-            .await?
-            .into_boxed(),
+        TransportMode::Tcp => tcp::Endpoint::bind("127.0.0.1:8081").await?.into_boxed(),
         TransportMode::Udp => udp::Endpoint::bind(udp::ConnectionParams {
-            bind_addr: "127.0.0.1:9010".parse()?,
-            connect_addr: "127.0.0.1:9009".parse()?,
+            bind_addr: "127.0.0.1:9010",
+            connect_addr: "127.0.0.1:9009",
         })
         .await?
         .into_boxed(),

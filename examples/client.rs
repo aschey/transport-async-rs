@@ -21,12 +21,12 @@ enum TransportMode {
 pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let cli = Cli::parse();
     let mut client = match cli.transport {
-        TransportMode::Tcp => tcp::Connection::connect("127.0.0.1:8081".parse()?)
+        TransportMode::Tcp => tcp::Connection::connect("127.0.0.1:8081")
             .await?
             .into_boxed(),
         TransportMode::Udp => udp::Connection::connect(udp::ConnectionParams {
-            bind_addr: "127.0.0.1:9009".parse()?,
-            connect_addr: "127.0.0.1:9010".parse()?,
+            bind_addr: "127.0.0.1:9009",
+            connect_addr: "127.0.0.1:9010",
         })
         .await?
         .into_boxed(),
