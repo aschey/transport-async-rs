@@ -139,8 +139,8 @@ impl<Req, Res> Stream for LocalTransportFactory<Req, Res> {
     }
 }
 
-pub fn unbounded_channel<Req, Res>(
-) -> (LocalTransportFactory<Req, Res>, LocalClientStream<Res, Req>) {
+pub fn unbounded_channel<Req, Res>()
+-> (LocalTransportFactory<Req, Res>, LocalClientStream<Res, Req>) {
     let (tx, rx) = mpsc::unbounded_channel();
     (
         LocalTransportFactory {

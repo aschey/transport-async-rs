@@ -1,14 +1,10 @@
-use std::{
-    io,
-    marker::PhantomData,
-    pin::Pin,
-    task::{Context, Poll},
-};
+use std::io;
+use std::marker::PhantomData;
+use std::pin::Pin;
+use std::task::{Context, Poll};
 
-use tokio::{
-    io::{AsyncRead, AsyncWrite, ReadBuf},
-    net::{ToSocketAddrs, UdpSocket},
-};
+use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
+use tokio::net::{ToSocketAddrs, UdpSocket};
 
 use crate::{Bind, Connect};
 

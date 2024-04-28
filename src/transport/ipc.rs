@@ -1,4 +1,5 @@
-use std::{io, path::PathBuf};
+use std::io;
+use std::path::PathBuf;
 
 pub use parity_tokio_ipc::{IntoIpcPath, IpcSecurity, OnConflict, SecurityAttributes, ServerId};
 use parity_tokio_ipc::{IpcEndpoint, IpcStream};

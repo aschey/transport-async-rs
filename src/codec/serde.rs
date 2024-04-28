@@ -6,8 +6,7 @@ use tokio::io::{AsyncRead, AsyncWrite};
 use tokio_util::codec::LengthDelimitedCodec;
 
 use super::serializer::CodecSerializer;
-use super::EncodedStream;
-use super::{AsyncReadWrite, Codec, CodecBuilder};
+use super::{AsyncReadWrite, Codec, CodecBuilder, EncodedStream};
 
 pub fn serde_codec<Req, Res>(
     incoming: impl AsyncRead + AsyncWrite + Send + Unpin + 'static,

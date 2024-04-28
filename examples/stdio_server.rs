@@ -1,6 +1,7 @@
+use std::error::Error;
+
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
-use std::error::Error;
 use transport_async::codec::{Codec, CodecStream, SerdeCodec};
 use transport_async::stdio::StdioTransport;
 

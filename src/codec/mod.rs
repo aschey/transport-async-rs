@@ -1,7 +1,8 @@
 use std::io;
 
-use crate::AsyncReadWrite;
 use bytes::{Bytes, BytesMut};
+
+use crate::AsyncReadWrite;
 
 mod builder;
 pub use builder::*;

@@ -1,11 +1,12 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use super::EncodedStream;
-use crate::codec::CodecBuilder;
 use futures::{ready, Stream, TryStream};
 use pin_project_lite::pin_project;
 use tokio::io::{AsyncRead, AsyncWrite};
+
+use super::EncodedStream;
+use crate::codec::CodecBuilder;
 
 pin_project! {
     pub struct CodecStream<B, I, E, S>

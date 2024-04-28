@@ -1,5 +1,7 @@
+use std::io;
+use std::pin::Pin;
+
 use futures::{Future, Stream, StreamExt, TryStream};
-use std::{io, pin::Pin};
 use tokio::io::{AsyncRead, AsyncWrite};
 
 use crate::AsyncReadWrite;

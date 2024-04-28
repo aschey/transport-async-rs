@@ -1,10 +1,10 @@
+use std::error::Error;
+
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
-use std::error::Error;
 use transport_async::codec::{Codec, CodecStream, SerdeCodec};
 use transport_async::ipc::{IpcSecurity, OnConflict, SecurityAttributes, ServerId};
-use transport_async::BoxedStream;
-use transport_async::{ipc, tcp, udp, Bind};
+use transport_async::{ipc, tcp, udp, Bind, BoxedStream};
 
 #[derive(clap::Parser)]
 struct Cli {
