@@ -437,19 +437,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
-name = "parity-tokio-ipc"
-version = "0.9.0"
-source = "git+https://github.com/aschey/parity-tokio-ipc?rev=feb8297ed586862034faed03794d5d46519cd064#feb8297ed586862034faed03794d5d46519cd064"
-dependencies = [
- "dirs",
- "futures",
- "libc",
- "tokio",
- "tracing",
- "windows-sys 0.52.0",
-]
-
-[[package]]
 name = "paste"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -657,6 +644,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "tipsy"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05d8ad7cbd9ecdd4fd72c85fce329558a90c94ec1d5ca0f2fad8f6dd37c12c7a"
+dependencies = [
+ "dirs",
+ "futures",
+ "libc",
+ "tokio",
+ "tracing",
+ "windows-sys 0.52.0",
+]
+
+[[package]]
 name = "tokio"
 version = "1.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -766,9 +767,9 @@ dependencies = [
  "bytes",
  "clap",
  "futures",
- "parity-tokio-ipc",
  "pin-project-lite",
  "serde",
+ "tipsy",
  "tokio",
  "tokio-serde",
  "tokio-stream",

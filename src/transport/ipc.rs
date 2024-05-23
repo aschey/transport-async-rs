@@ -1,8 +1,8 @@
 use std::io;
 use std::path::PathBuf;
 
-pub use parity_tokio_ipc::{IntoIpcPath, IpcSecurity, OnConflict, SecurityAttributes, ServerId};
-use parity_tokio_ipc::{IpcEndpoint, IpcStream};
+use tipsy::IpcStream;
+pub use tipsy::{IntoIpcPath, OnConflict, SecurityAttributes, ServerId};
 
 use super::{Bind, Connect};
 
@@ -33,7 +33,7 @@ impl Bind for Endpoint {
     type Params = EndpointParams;
 
     async fn bind(params: Self::Params) -> io::Result<Self::Stream> {
-        let mut endpoint = parity_tokio_ipc::Endpoint::new(params.path, params.on_conflict)?;
+        let mut endpoint = tipsy::Endpoint::new(params.path, params.on_conflict)?;
         endpoint.set_security_attributes(params.security_attributes);
         endpoint.incoming()
     }
@@ -54,10 +54,10 @@ impl ConnectionParams {
 }
 
 impl Connect for Connection {
-    type Stream = parity_tokio_ipc::Connection;
+    type Stream = tipsy::Connection;
     type Params = ConnectionParams;
 
     async fn connect(params: Self::Params) -> io::Result<Self::Stream> {
-        parity_tokio_ipc::Endpoint::connect(params.path).await
+        tipsy::Endpoint::connect(params.path).await
     }
 }
