@@ -1,9 +1,11 @@
 use std::fmt::Debug;
 use std::io;
 use std::pin::Pin;
+use std::process::Stdio;
 
 use futures::{Future, SinkExt, Stream, StreamExt};
 use transport_async::codec::{Codec, CodecStream, SerdeCodec, StreamSink};
+use transport_async::stdio::StdioTransport;
 use transport_async::{ipc, local, tcp, udp, Bind, Connect};
 
 async fn run_server<I, E>(stream: Pin<Box<dyn Stream<Item = Result<I, E>> + Send>>)
@@ -160,4 +162,20 @@ async fn test_local() {
         run_server(transport.boxed()).await;
     });
     run_client(|| async { client_stream.connect_unbounded() }).await;
+}
+
+#[tokio::test]
+async fn test_stdio() {
+    let mut process = tokio::process::Command::new("cargo")
+        .args(["run", "--example", "stdio_test", "--all-features"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+
+    run_client(|| async move {
+        let client = StdioTransport::from_child(&mut process).unwrap();
+        Ok(SerdeCodec::<String, String>::new(Codec::Bincode).client(client))
+    })
+    .await;
 }
