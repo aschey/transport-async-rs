@@ -180,14 +180,14 @@ async fn test_ipc() {
 
 #[tokio::test]
 async fn test_tcp() {
-    let endpoint = tcp::Endpoint::bind("127.0.0.1:8081").await.unwrap();
+    let endpoint = tcp::Endpoint::bind("127.0.0.1:54124").await.unwrap();
 
     let transport = CodecStream::new(endpoint, SerdeCodec::<String, String>::new(Codec::Bincode));
     tokio::spawn(async move {
         run_server(transport.boxed()).await;
     });
     run_clients(|| async move {
-        let client = tcp::Connection::connect("127.0.0.1:8081").await?;
+        let client = tcp::Connection::connect("127.0.0.1:54124").await?;
         Ok(SerdeCodec::<String, String>::new(Codec::Bincode).client(client))
     })
     .await;
@@ -195,14 +195,14 @@ async fn test_tcp() {
 
 #[tokio::test]
 async fn length_delimited() {
-    let endpoint = tcp::Endpoint::bind("127.0.0.1:8081").await.unwrap();
+    let endpoint = tcp::Endpoint::bind("127.0.0.1:24624").await.unwrap();
 
     let transport = CodecStream::new(endpoint, LengthDelimitedCodec);
     tokio::spawn(async move {
         run_server_bytes(transport.boxed()).await;
     });
     run_clients_bytes(|| async move {
-        let client = tcp::Connection::connect("127.0.0.1:8081").await?;
+        let client = tcp::Connection::connect("127.0.0.1:24624").await?;
         Ok(LengthDelimitedCodec::client(client))
     })
     .await;
