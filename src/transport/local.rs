@@ -179,10 +179,6 @@ where
     }
 }
 
-pub struct ConnectParams<Req, Res> {
-    mode: ConnectMode,
-    tx: Sender<LocalTransport<Res, Req>>,
-}
 pub enum ConnectMode {
     Unbounded,
     Bounded { buffer_size: usize },
@@ -193,17 +189,16 @@ where
     for<'a> Req: From<&'a [u8]> + Send + Debug + 'static,
     Res: AsRef<[u8]> + Send + Debug + 'static,
 {
-    type Params = ConnectParams<Req, Res>;
+    type Params = Self;
     type Stream = LocalTransport<Req, Res>;
 
     async fn connect(params: Self::Params) -> io::Result<Self::Stream> {
-        let stream = LocalClientStream { tx: params.tx };
-        match params.mode {
-            ConnectMode::Unbounded => stream
+        match &params.tx {
+            Sender::Unbounded(_) => params
                 .connect_unbounded()
                 .map_err(|e| io::Error::new(io::ErrorKind::NotConnected, e)),
-            ConnectMode::Bounded { buffer_size } => stream
-                .connect(buffer_size)
+            Sender::Bounded(tx) => params
+                .connect_bounded(tx.capacity())
                 .map_err(|e| io::Error::new(io::ErrorKind::NotConnected, e)),
         }
     }
@@ -234,7 +229,7 @@ impl<Req: Debug + Send + 'static, Res: Debug + Send + 'static> LocalClientStream
         })
     }
 
-    pub fn connect(
+    pub fn connect_bounded(
         &self,
         buffer: usize,
     ) -> Result<LocalTransport<Req, Res>, Box<dyn Error + Send + Sync>> {

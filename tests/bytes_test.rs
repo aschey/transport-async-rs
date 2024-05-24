@@ -1,12 +1,14 @@
+use std::fmt::Debug;
 use std::io;
 
 use futures::{Future, Stream, StreamExt};
 use tokio::io::{split, AsyncReadExt, AsyncWriteExt};
+use transport_async::local::{self, LocalClientStream};
 use transport_async::{ipc, tcp, udp, AsyncReadWrite, Bind, Connect};
 
-async fn run_server<S, A>(incoming: S)
+async fn run_server<S, A, E>(incoming: S)
 where
-    S: Stream<Item = io::Result<A>>,
+    S: Stream<Item = Result<A, E>>,
     A: AsyncReadWrite,
 {
     futures::pin_mut!(incoming);
@@ -66,11 +68,12 @@ where
     assert_eq!(rx_buf2, msg);
 }
 
-async fn run_client<F, A, Fut>(create_client: F)
+async fn run_client<F, A, Fut, E>(create_client: F)
 where
-    F: Fn() -> Fut,
-    Fut: Future<Output = Result<A, io::Error>>,
+    F: FnOnce() -> Fut,
+    Fut: Future<Output = Result<A, E>>,
     A: AsyncReadWrite,
+    E: Debug,
 {
     println!("Connecting to client 0...");
     let mut client_0 = create_client().await.expect("failed to open client_0");
@@ -141,4 +144,22 @@ async fn test_udp() {
         })
     })
     .await;
+}
+
+#[tokio::test]
+async fn test_local() {
+    let (transport, client_stream) = local::unbounded_channel::<Vec<u8>, Vec<u8>>();
+    tokio::spawn(async move {
+        run_server(transport).await;
+    });
+    run_client(|| LocalClientStream::connect(client_stream)).await;
+}
+
+#[tokio::test]
+async fn test_local_bounded() {
+    let (transport, client_stream) = local::channel::<Vec<u8>, Vec<u8>>(32);
+    tokio::spawn(async move {
+        run_server(transport).await;
+    });
+    run_client(move || LocalClientStream::connect(client_stream)).await;
 }

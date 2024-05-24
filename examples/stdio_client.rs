@@ -5,6 +5,7 @@ use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use transport_async::codec::{Codec, SerdeCodec};
 use transport_async::stdio::StdioTransport;
+use transport_async::Connect;
 
 #[derive(clap::Parser)]
 struct Cli {
@@ -30,7 +31,7 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         CodecMode::MessagePack => (Codec::MessagePack, "message-pack"),
     };
 
-    let mut process = tokio::process::Command::new("cargo")
+    let process = tokio::process::Command::new("cargo")
         .args([
             "run",
             "--example",
@@ -42,7 +43,9 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         .stdout(Stdio::piped())
         .spawn()?;
 
-    let client = StdioTransport::from_child(&mut process).expect("Process missing io handles");
+    let client = StdioTransport::connect(process)
+        .await
+        .expect("Process missing io handles");
 
     let mut client = SerdeCodec::<usize, usize>::new(codec).client(client);
 

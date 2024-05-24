@@ -70,6 +70,17 @@ where
 
 pub struct LengthDelimitedCodec;
 
+impl LengthDelimitedCodec {
+    pub fn client(
+        incoming: impl AsyncReadWrite,
+    ) -> EncodedStream<BytesMut, Bytes, io::Error, io::Error> {
+        Box::new(tokio_util::codec::Framed::new(
+            incoming,
+            tokio_util::codec::LengthDelimitedCodec::new(),
+        ))
+    }
+}
+
 impl CodecBuilder for LengthDelimitedCodec {
     type Req = BytesMut;
     type Res = Bytes;
@@ -80,6 +91,6 @@ impl CodecBuilder for LengthDelimitedCodec {
         &self,
         incoming: Box<dyn AsyncReadWrite>,
     ) -> EncodedStream<Self::Req, Self::Res, Self::StreamErr, Self::SinkErr> {
-        super::length_delimited_codec(incoming)
+        Self::client(incoming)
     }
 }
