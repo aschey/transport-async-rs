@@ -1,17 +1,18 @@
+use std::fmt::Debug;
 use std::io;
+use std::pin::Pin;
 
-use futures::{Future, SinkExt, StreamExt, TryStream};
-use tokio::io::{AsyncRead, AsyncWrite};
-use transport_async::codec::{Codec, CodecStream, SerdeCodec};
-use transport_async::{ipc, tcp, udp, Bind, Connect};
+use futures::{Future, SinkExt, Stream, StreamExt};
+use transport_async::codec::{Codec, CodecStream, SerdeCodec, StreamSink};
+use transport_async::{ipc, local, tcp, udp, Bind, Connect};
 
-async fn run_server<I, S>(incoming: CodecStream<SerdeCodec<String, String>, I, io::Error, S>)
+async fn run_server<I, E>(stream: Pin<Box<dyn Stream<Item = Result<I, E>> + Send>>)
 where
-    I: AsyncRead + AsyncWrite + Send + Unpin + 'static,
-    S: TryStream<Ok = I, Error = io::Error>,
+    I: StreamSink<String, Error = E, Item = Result<String, E>>,
+    E: Debug,
 {
-    futures::pin_mut!(incoming);
-    while let Some(result) = incoming.next().await {
+    futures::pin_mut!(stream);
+    while let Some(result) = stream.next().await {
         match result {
             Ok(mut stream) => {
                 let msg = stream.next().await.expect("unable to read from socket");
@@ -25,19 +26,18 @@ where
     }
 }
 
-async fn run_clients<F, I, Fut>(create_client: F)
+async fn run_clients<F, I, Fut, E>(create_client: F)
 where
     F: Fn() -> Fut,
     Fut: Future<Output = Result<I, io::Error>>,
-    I: AsyncRead + AsyncWrite + Send + Unpin + 'static,
+    I: StreamSink<String, Error = E, Item = Result<String, E>>,
+    E: Debug,
 {
     println!("Connecting to client 0...");
-    let mut client_0 = SerdeCodec::<String, String>::new(Codec::Bincode)
-        .client(create_client().await.expect("failed to open client_0"));
+    let mut client_0 = create_client().await.expect("failed to open client_0");
 
     println!("Connecting to client 1...");
-    let mut client_1 = SerdeCodec::<String, String>::new(Codec::Bincode)
-        .client(create_client().await.expect("failed to open client_0"));
+    let mut client_1 = create_client().await.expect("failed to open client_0");
 
     let msg = "hello".to_string();
 
@@ -65,16 +65,15 @@ where
     assert_eq!(rx2, msg);
 }
 
-async fn run_client<F, I, Fut>(create_client: F)
+async fn run_client<F, I, Fut, E>(create_client: F)
 where
-    F: Fn() -> Fut,
-    Fut: Future<Output = Result<I, io::Error>>,
-    I: AsyncRead + AsyncWrite + Send + Unpin + 'static,
+    F: FnOnce() -> Fut,
+    Fut: Future<Output = Result<I, E>>,
+    I: StreamSink<String, Error = E, Item = Result<String, E>>,
+    E: Debug,
 {
     println!("Connecting to client 0...");
-    let mut client_0 = SerdeCodec::<String, String>::new(Codec::Bincode)
-        .client(create_client().await.expect("failed to open client_0"));
-
+    let mut client_0 = create_client().await.expect("failed to open client_0");
     let msg = "hello".to_string();
 
     client_0
@@ -106,10 +105,12 @@ async fn test_ipc() {
     let transport = CodecStream::new(endpoint, SerdeCodec::<String, String>::new(Codec::Bincode));
 
     tokio::spawn(async move {
-        run_server(transport).await;
+        run_server(transport.boxed()).await;
     });
-    run_clients(|| {
-        ipc::Connection::connect(ipc::ConnectionParams::new(ipc::ServerId("test")).unwrap())
+    run_clients(|| async move {
+        let client =
+            ipc::Connection::connect(ipc::ConnectionParams::new(ipc::ServerId("test"))?).await?;
+        Ok(SerdeCodec::<String, String>::new(Codec::Bincode).client(client))
     })
     .await;
 }
@@ -120,9 +121,13 @@ async fn test_tcp() {
 
     let transport = CodecStream::new(endpoint, SerdeCodec::<String, String>::new(Codec::Bincode));
     tokio::spawn(async move {
-        run_server(transport).await;
+        run_server(transport.boxed()).await;
     });
-    run_clients(|| tcp::Connection::connect("127.0.0.1:8081")).await;
+    run_clients(|| async move {
+        let client = tcp::Connection::connect("127.0.0.1:8081").await?;
+        Ok(SerdeCodec::<String, String>::new(Codec::Bincode).client(client))
+    })
+    .await;
 }
 
 #[tokio::test]
@@ -135,13 +140,24 @@ async fn test_udp() {
     .unwrap();
     let transport = CodecStream::new(endpoint, SerdeCodec::<String, String>::new(Codec::Bincode));
     tokio::spawn(async move {
-        run_server(transport).await;
+        run_server(transport.boxed()).await;
     });
-    run_client(|| {
-        udp::Connection::connect(udp::ConnectionParams {
+    run_client(|| async move {
+        let client = udp::Connection::connect(udp::ConnectionParams {
             bind_addr: "127.0.0.1:23684",
             connect_addr: "127.0.0.1:23683",
         })
+        .await?;
+        Ok(SerdeCodec::<String, String>::new(Codec::Bincode).client(client))
     })
     .await;
+}
+
+#[tokio::test]
+async fn test_local() {
+    let (transport, client_stream) = local::unbounded_channel::<String, String>();
+    tokio::spawn(async move {
+        run_server(transport.boxed()).await;
+    });
+    run_client(|| async { client_stream.connect_unbounded() }).await;
 }
