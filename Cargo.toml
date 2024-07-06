@@ -15,6 +15,8 @@ tokio-serde = { version = "0.9", optional = true }
 bytes = { version = "1", optional = true }
 tokio-util = { version = "0.7", features = ["codec"], optional = true }
 pin-project-lite = "0.2"
+quinn = { version = "0.11", optional = true }
+async-stream = { version = "0.3", optional = true }
 
 [features]
 codec = ["serde", "tokio-serde", "bytes", "tokio-util"]
@@ -27,9 +29,10 @@ local = ["tokio/sync"]
 stdio = ["tokio/io-std", "tokio/process", "tokio-stream"]
 tcp = ["tokio/net", "tokio-stream"]
 udp = ["tokio/net", "tokio-stream"]
-all-transports = ["ipc", "local", "stdio", "tcp", "udp"]
+all-transports = ["ipc", "local", "stdio", "tcp", "udp", "quic"]
 all-codecs = ["cbor", "json", "messagepack", "bincode"]
 all = ["all-transports", "codec"]
+quic = ["dep:quinn", "dep:async-stream"]
 
 [dev-dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
@@ -45,19 +48,19 @@ tokio = { version = "1.37.0", features = [
 
 [[example]]
 name = "client"
-required-features = ["ipc", "tcp", "udp"]
+required-features = ["all-transports"]
 
 [[example]]
 name = "server"
-required-features = ["ipc", "tcp", "udp"]
+required-features = ["all-transports"]
 
 [[example]]
 name = "codec_client"
-required-features = ["ipc", "tcp", "udp", "all-codecs"]
+required-features = ["all-transports", "all-codecs"]
 
 [[example]]
 name = "codec_server"
-required-features = ["ipc", "tcp", "udp", "all-codecs"]
+required-features = ["all-transports", "all-codecs"]
 
 [[example]]
 name = "local"

@@ -1,9 +1,11 @@
 use std::error::Error;
+use std::fs;
 
 use clap::Parser;
+use quinn::rustls;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use transport_async::ipc::ServerId;
-use transport_async::{ipc, tcp, udp, BoxedAsyncRW, Connect};
+use transport_async::{ipc, quic, tcp, udp, BoxedAsyncRW, Connect};
 
 #[derive(clap::Parser)]
 struct Cli {
@@ -14,6 +16,7 @@ struct Cli {
 enum TransportMode {
     Tcp,
     Udp,
+    Quic,
     Ipc,
 }
 
@@ -27,6 +30,27 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         TransportMode::Udp => udp::Connection::connect(udp::ConnectionParams {
             bind_addr: "127.0.0.1:9009",
             connect_addr: "127.0.0.1:9010",
+        })
+        .await?
+        .into_boxed(),
+        TransportMode::Quic => quic::Connection::connect(quic::ConnectionParams {
+            bind_addr: "0.0.0.0:0".parse().unwrap(),
+            connect_addr: "127.0.0.1:8081".parse().unwrap(),
+            server_name: "localhost".to_string(),
+            tls_config: {
+                let mut roots = rustls::RootCertStore::empty();
+                roots
+                    .add(quinn::rustls::pki_types::CertificateDer::from(
+                        fs::read("./examples/certs/cert.der").unwrap(),
+                    ))
+                    .unwrap();
+                let mut client_crypto = rustls::ClientConfig::builder()
+                    .with_root_certificates(roots)
+                    .with_no_client_auth();
+
+                client_crypto.alpn_protocols = vec![b"hq-29".into()];
+                client_crypto
+            },
         })
         .await?
         .into_boxed(),

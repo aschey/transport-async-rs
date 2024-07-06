@@ -9,6 +9,8 @@ use crate::AsyncReadWrite;
 pub mod ipc;
 #[cfg(feature = "local")]
 pub mod local;
+#[cfg(feature = "quic")]
+pub mod quic;
 #[cfg(feature = "stdio")]
 pub mod stdio;
 #[cfg(feature = "tcp")]
