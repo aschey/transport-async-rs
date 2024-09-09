@@ -62,7 +62,7 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         .await?
         .into_boxed(),
         TransportMode::Ipc => ipc::Endpoint::bind(ipc::EndpointParams::new(
-            ServerId("test"),
+            ServerId::new("test"),
             SecurityAttributes::allow_everyone_create()?,
             OnConflict::Overwrite,
         )?)

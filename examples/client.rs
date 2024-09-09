@@ -55,7 +55,7 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         .await?
         .into_boxed(),
         TransportMode::Ipc => {
-            ipc::Connection::connect(ipc::ConnectionParams::new(ServerId("test"))?)
+            ipc::Connection::connect(ipc::ConnectionParams::new(ServerId::new("test"))?)
                 .await?
                 .into_boxed()
         }

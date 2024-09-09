@@ -97,7 +97,7 @@ where
 async fn test_ipc() {
     let endpoint = ipc::Endpoint::bind(
         ipc::EndpointParams::new(
-            ipc::ServerId("test"),
+            ipc::ServerId::new("test"),
             ipc::SecurityAttributes::allow_everyone_create().unwrap(),
             ipc::OnConflict::Overwrite,
         )
@@ -110,7 +110,7 @@ async fn test_ipc() {
         run_server(endpoint).await;
     });
     run_clients(|| {
-        ipc::Connection::connect(ipc::ConnectionParams::new(ipc::ServerId("test")).unwrap())
+        ipc::Connection::connect(ipc::ConnectionParams::new(ipc::ServerId::new("test")).unwrap())
     })
     .await;
 }

@@ -143,7 +143,7 @@ where
 async fn test_ipc() {
     let endpoint = ipc::Endpoint::bind(
         ipc::EndpointParams::new(
-            ipc::ServerId("test"),
+            ipc::ServerId::new("test"),
             ipc::SecurityAttributes::allow_everyone_create().unwrap(),
             ipc::OnConflict::Overwrite,
         )
@@ -159,7 +159,8 @@ async fn test_ipc() {
     });
     run_clients(|| async move {
         let client =
-            ipc::Connection::connect(ipc::ConnectionParams::new(ipc::ServerId("test"))?).await?;
+            ipc::Connection::connect(ipc::ConnectionParams::new(ipc::ServerId::new("test"))?)
+                .await?;
         Ok(SerdeCodec::<String, String>::new(Codec::Bincode).client(client))
     })
     .await;

@@ -33,8 +33,8 @@ impl Bind for Endpoint {
     type Params = EndpointParams;
 
     async fn bind(params: Self::Params) -> io::Result<Self::Stream> {
-        let mut endpoint = tipsy::Endpoint::new(params.path, params.on_conflict)?;
-        endpoint.set_security_attributes(params.security_attributes);
+        let endpoint = tipsy::Endpoint::new(params.path, params.on_conflict)?
+            .security_attributes(params.security_attributes);
         endpoint.incoming()
     }
 }
