@@ -5,7 +5,7 @@ use clap::Parser;
 use futures::{SinkExt, StreamExt};
 use transport_async::codec::{Codec, SerdeCodec};
 use transport_async::ipc::ServerId;
-use transport_async::{ipc, quic, tcp, udp, BoxedAsyncRW, Connect};
+use transport_async::{BoxedAsyncRW, Connect, ipc, quic, tcp, udp};
 
 use crate::quic::rustls;
 use crate::quic::rustls::RootCertStore;

@@ -3,9 +3,9 @@ use std::fs;
 
 use clap::Parser;
 use futures::StreamExt;
-use tokio::io::{split, AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, split};
 use transport_async::ipc::{OnConflict, SecurityAttributes, ServerId};
-use transport_async::{ipc, quic, tcp, udp, Bind, BoxedStream};
+use transport_async::{Bind, BoxedStream, ipc, quic, tcp, udp};
 
 use crate::quic::rustls::pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer};
 

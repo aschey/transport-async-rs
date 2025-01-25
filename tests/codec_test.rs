@@ -9,7 +9,7 @@ use quinn::rustls::pki_types::{PrivateKeyDer, PrivatePkcs8KeyDer};
 use quinn::rustls::{self, RootCertStore};
 use transport_async::codec::{Codec, CodecStream, LengthDelimitedCodec, SerdeCodec, StreamSink};
 use transport_async::stdio::StdioTransport;
-use transport_async::{ipc, local, quic, tcp, udp, Bind, Connect};
+use transport_async::{Bind, Connect, ipc, local, quic, tcp, udp};
 
 async fn run_server<I, E, S>(stream: Pin<Box<dyn Stream<Item = Result<I, E>> + Send>>)
 where

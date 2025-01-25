@@ -2,9 +2,9 @@ use std::fmt::Debug;
 use std::io;
 
 use futures::{Future, Stream, StreamExt};
-use tokio::io::{split, AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncReadExt, AsyncWriteExt, split};
 use transport_async::local::{self, LocalClientStream};
-use transport_async::{ipc, tcp, udp, AsyncReadWrite, Bind, Connect};
+use transport_async::{AsyncReadWrite, Bind, Connect, ipc, tcp, udp};
 
 async fn run_server<S, A, E>(incoming: S)
 where

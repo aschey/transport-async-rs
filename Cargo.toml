@@ -35,15 +35,15 @@ all = ["all-transports", "codec"]
 quic = ["dep:quinn", "dep:async-stream"]
 
 [dev-dependencies]
-clap = { version = "4.5.4", features = ["derive"] }
-tokio = { version = "1.37.0", features = [
-    "net",
-    "sync",
-    "io-std",
-    "process",
-    "macros",
-    "rt-multi-thread",
-    "io-util",
+clap = { version = "4.5.27", features = ["derive"] }
+tokio = { version = "1.43.0", features = [
+  "net",
+  "sync",
+  "io-std",
+  "process",
+  "macros",
+  "rt-multi-thread",
+  "io-util",
 ] }
 
 [[example]]

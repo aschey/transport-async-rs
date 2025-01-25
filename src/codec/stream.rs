@@ -1,7 +1,7 @@
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use futures::{ready, Stream, TryStream};
+use futures::{Stream, TryStream, ready};
 use pin_project_lite::pin_project;
 use tokio::io::{AsyncRead, AsyncWrite};
 

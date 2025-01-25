@@ -5,7 +5,7 @@ use clap::Parser;
 use quinn::rustls;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use transport_async::ipc::ServerId;
-use transport_async::{ipc, quic, tcp, udp, BoxedAsyncRW, Connect};
+use transport_async::{BoxedAsyncRW, Connect, ipc, quic, tcp, udp};
 
 #[derive(clap::Parser)]
 struct Cli {

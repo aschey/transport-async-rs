@@ -3,9 +3,9 @@ use std::process::Stdio;
 
 use clap::Parser;
 use futures::{SinkExt, StreamExt};
+use transport_async::Connect;
 use transport_async::codec::{Codec, SerdeCodec};
 use transport_async::stdio::StdioTransport;
-use transport_async::Connect;
 
 #[derive(clap::Parser)]
 struct Cli {
