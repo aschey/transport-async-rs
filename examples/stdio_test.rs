@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use futures::{SinkExt, StreamExt};
+use futures_util::{SinkExt, StreamExt};
 use transport_async::codec::{Codec, CodecStream, SerdeCodec};
 use transport_async::stdio::StdioTransport;
 

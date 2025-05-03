@@ -3,7 +3,7 @@ use std::io;
 use std::marker::PhantomData;
 
 use bytes::{Bytes, BytesMut};
-use futures::{Sink, Stream};
+use futures_util::{Sink, Stream};
 
 use super::AsyncReadWrite;
 

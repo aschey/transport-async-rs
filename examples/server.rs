@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fs;
 
 use clap::Parser;
-use futures::StreamExt;
+use futures_util::StreamExt;
 use tokio::io::{AsyncReadExt, AsyncWriteExt, split};
 use transport_async::ipc::{OnConflict, SecurityAttributes, ServerId};
 use transport_async::{Bind, BoxedStream, ipc, quic, tcp, udp};
@@ -60,7 +60,7 @@ pub async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         .into_boxed(),
     };
 
-    futures::pin_mut!(incoming);
+    futures_util::pin_mut!(incoming);
     let mut conns = vec![];
     while let Some(result) = incoming.next().await {
         if let Ok(stream) = result {

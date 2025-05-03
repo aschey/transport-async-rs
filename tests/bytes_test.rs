@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::io;
 
-use futures::{Future, Stream, StreamExt};
+use futures_util::{Future, Stream, StreamExt};
 use tokio::io::{AsyncReadExt, AsyncWriteExt, split};
 use transport_async::local::{self, LocalClientStream};
 use transport_async::{AsyncReadWrite, Bind, Connect, ipc, tcp, udp};
@@ -11,7 +11,7 @@ where
     S: Stream<Item = Result<A, E>>,
     A: AsyncReadWrite,
 {
-    futures::pin_mut!(incoming);
+    futures_util::pin_mut!(incoming);
     while let Some(result) = incoming.next().await {
         match result {
             Ok(stream) => {

@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-futures = "0.3"
-tipsy = { version = "0.3", optional = true }
+futures-util = "0.3"
+tipsy = { version = "0.4", optional = true }
 tokio = { version = "1" }
 tokio-stream = { version = "0.1", features = ["net"], optional = true }
 serde = { version = "1", features = ["derive"], optional = true }
@@ -35,8 +35,8 @@ all = ["all-transports", "codec"]
 quic = ["dep:quinn", "dep:async-stream"]
 
 [dev-dependencies]
-clap = { version = "4.5.27", features = ["derive"] }
-tokio = { version = "1.43.0", features = [
+clap = { version = "4.5.37", features = ["derive"] }
+tokio = { version = "1.44.2", features = [
   "net",
   "sync",
   "io-std",

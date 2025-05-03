@@ -4,7 +4,7 @@ use std::process::Stdio;
 use std::{fs, io};
 
 use bytes::{BufMut, Bytes, BytesMut};
-use futures::{Future, SinkExt, Stream, StreamExt};
+use futures_util::{Future, SinkExt, Stream, StreamExt};
 use quinn::rustls::pki_types::{PrivateKeyDer, PrivatePkcs8KeyDer};
 use quinn::rustls::{self, RootCertStore};
 use transport_async::codec::{Codec, CodecStream, LengthDelimitedCodec, SerdeCodec, StreamSink};
@@ -17,7 +17,7 @@ where
     S: Send,
     E: Debug,
 {
-    futures::pin_mut!(stream);
+    futures_util::pin_mut!(stream);
     while let Some(result) = stream.next().await {
         if let Ok(mut stream) = result {
             tokio::spawn(async move {
@@ -38,7 +38,7 @@ where
     I: StreamSink<Bytes, Error = E, Item = Result<BytesMut, E>>,
     E: Debug,
 {
-    futures::pin_mut!(stream);
+    futures_util::pin_mut!(stream);
     while let Some(result) = stream.next().await {
         match result {
             Ok(mut stream) => {

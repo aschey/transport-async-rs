@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::task::Poll;
 
 use async_stream::stream;
-use futures::{Stream, StreamExt};
+use futures_util::{Stream, StreamExt};
 use pin_project_lite::pin_project;
 use quinn::crypto::rustls::{QuicClientConfig, QuicServerConfig};
 pub use quinn::rustls;

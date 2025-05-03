@@ -1,7 +1,7 @@
 use std::io;
 use std::pin::Pin;
 
-use futures::{Future, Stream, StreamExt, TryStream};
+use futures_util::{Future, Stream, StreamExt, TryStream};
 use tokio::io::{AsyncRead, AsyncWrite};
 
 use crate::AsyncReadWrite;
@@ -20,7 +20,7 @@ pub mod udp;
 
 pub trait Bind
 where
-    <<Self as Bind>::Stream as futures::TryStream>::Ok: AsyncRead + AsyncWrite,
+    <<Self as Bind>::Stream as futures_util::TryStream>::Ok: AsyncRead + AsyncWrite,
 {
     type Stream: TryStream;
     type Params;

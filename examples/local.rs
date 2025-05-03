@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::result::Result;
 
-use futures::{SinkExt, StreamExt};
+use futures_util::{SinkExt, StreamExt};
 use transport_async::local;
 
 #[tokio::main]

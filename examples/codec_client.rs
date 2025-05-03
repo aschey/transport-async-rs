@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fs;
 
 use clap::Parser;
-use futures::{SinkExt, StreamExt};
+use futures_util::{SinkExt, StreamExt};
 use transport_async::codec::{Codec, SerdeCodec};
 use transport_async::ipc::ServerId;
 use transport_async::{BoxedAsyncRW, Connect, ipc, quic, tcp, udp};

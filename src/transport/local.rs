@@ -4,7 +4,7 @@ use std::io;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 
-use futures::{Sink, Stream, ready};
+use futures_util::{Sink, Stream, ready};
 use tokio::io::{AsyncRead, AsyncWrite};
 use tokio::sync::mpsc::{self};
 
